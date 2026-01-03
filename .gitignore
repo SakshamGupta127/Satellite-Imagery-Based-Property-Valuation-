@@ -1,4 +1,14 @@
-data
+# Ignore actual data
+data/**
+
+
+# BUT allow DVC metadata files
+!data/*.dvc
+!data/**/.gitkeep
+
+
+
+Submission
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

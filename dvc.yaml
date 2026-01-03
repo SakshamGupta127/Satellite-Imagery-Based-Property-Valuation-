@@ -1,0 +1,80 @@
+stages:
+
+  feature_engineering_tabular:
+    cmd: python src/feature_engineering_tabular.py
+    deps:
+      - src/feature_engineering_tabular.py
+      - data/raw/train.csv
+      - data/raw/test.csv
+      - params.yaml
+    outs:
+      - data/final/train_processed.csv
+      - data/final/test_processed.csv
+
+  extract_image_features:
+    cmd: python src/extract_image_features.py
+    deps:
+      - src/extract_image_features.py
+      - data/images/Train_Photos
+      - data/images/Test_Photos
+    outs:
+      - data/image_features/train_image_features.csv
+      - data/image_features/test_image_features.csv
+
+  apply_pca:
+    cmd: python src/apply_pca.py
+    deps:
+      - src/apply_pca.py
+      - data/image_features/train_image_features.csv
+      - data/image_features/test_image_features.csv
+      - params.yaml
+    params:
+      - pca.n_components
+      - pca.random_state
+      - pca.scale
+    outs:
+      - data/image_features_pca/train_image_features_pca.csv
+      - data/image_features_pca/test_image_features_pca.csv
+      # - data/image_features_pca/pca_model.pkl
+      - data/image_features_pca/scaler.joblib
+
+  prepare_model_data:
+    cmd: python src/prepare_model_data.py
+    deps:
+      - src/prepare_model_data.py
+      - data/image_features_pca/train_image_features_pca.csv
+      - data/image_features_pca/test_image_features_pca.csv
+      - params.yaml
+    outs:
+      - data/Model_data/train_tabular_image.csv
+      - data/Model_data/test_tabular_image.csv
+
+  train_tabular_model:
+    cmd: python src/model_tabular.py
+    deps:
+      - src/model_tabular.py
+      - data/Model_data/train_tabular.csv
+      - data/Model_data/test_tabular.csv
+      - params.yaml
+    params:
+      - model
+      - xgboost
+    outs:
+      - Submission/predictions_tabular.csv
+    metrics:
+      - Submission/metrics_tabular.json
+
+  train_tabular_image_model:
+    cmd: python src/model_tabular_image.py
+    deps:
+      - src/model_tabular_image.py
+      - data/Model_data/train_tabular_image.csv
+      - data/Model_data/test_tabular_image.csv
+      - params.yaml
+    params:
+      - model
+      - xgboost
+    outs:
+      - Submission/predictions_tabular_image.csv
+    metrics:
+      - Submission/metrics_tabular_image.json

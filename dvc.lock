@@ -1,0 +1,203 @@
+schema: '2.0'
+stages:
+  feature_engineering_tabular:
+    cmd: python src/feature_engineering_tabular.py
+    deps:
+    - path: data/raw/test.csv
+      hash: md5
+      md5: b963664ac3c33bc84991c595b86166d1
+      size: 551751
+    - path: data/raw/train.csv
+      hash: md5
+      md5: 94acbdb55cb5ff529ec33373140921c6
+      size: 1768268
+    - path: params.yaml
+      hash: md5
+      md5: 840d2e640108c6162172e522e2ed3661
+      size: 264
+    - path: src/feature_engineering_tabular.py
+      hash: md5
+      md5: a6a0393cefc7d36e6b545089f06e9b60
+      size: 3034
+    outs:
+    - path: data/final/test_processed.csv
+      hash: md5
+      md5: 1903f1168649ebc76ce3351c4e94db21
+      size: 481643
+    - path: data/final/train_processed.csv
+      hash: md5
+      md5: 80e3051569d6103b404cfaa680998154
+      size: 1559683
+  extract_image_features:
+    cmd: python src/extract_image_features.py
+    deps:
+    - path: data/images/Test_Photos
+      hash: md5
+      md5: e972d9860afbba6c4608969511b4681a.dir
+      size: 127324444
+      nfiles: 5396
+    - path: data/images/Train_Photos
+      hash: md5
+      md5: c11e03fa23911a2572ca09b40c5b76ba.dir
+      size: 380489725
+      nfiles: 16110
+    - path: src/extract_image_features.py
+      hash: md5
+      md5: 571533021a09e0b491d1b38073e6ccfb
+      size: 2716
+    outs:
+    - path: data/image_features/test_image_features.csv
+      hash: md5
+      md5: 73f48e1259de292a0924af5223e21bc0
+      size: 157504810
+    - path: data/image_features/train_image_features.csv
+      hash: md5
+      md5: 61f1f221c262cb5dfa32b0b4cfce48ed
+      size: 470400920
+  apply_pca:
+    cmd: python src/apply_pca.py
+    deps:
+    - path: data/image_features/test_image_features.csv
+      hash: md5
+      md5: 73f48e1259de292a0924af5223e21bc0
+      size: 157504810
+    - path: data/image_features/train_image_features.csv
+      hash: md5
+      md5: 61f1f221c262cb5dfa32b0b4cfce48ed
+      size: 470400920
+    - path: params.yaml
+      hash: md5
+      md5: 840d2e640108c6162172e522e2ed3661
+      size: 264
+    - path: src/apply_pca.py
+      hash: md5
+      md5: 000fc2f85487d5269ead292c1460a30c
+      size: 2591
+    params:
+      params.yaml:
+        pca.n_components: 256
+        pca.random_state: 42
+        pca.scale: true
+    outs:
+    - path: data/image_features_pca/scaler.joblib
+      hash: md5
+      md5: 5e4c7e15b684b08abb11104e8402df8d
+      size: 49735
+    - path: data/image_features_pca/test_image_features_pca.csv
+      hash: md5
+      md5: be04f9a197f6a3c43bbed77961d84df8
+      size: 27032006
+    - path: data/image_features_pca/train_image_features_pca.csv
+      hash: md5
+      md5: 01bfe9d70dfe614f737b3b9d81c95869
+      size: 80691019
+  prepare_model_data:
+    cmd: python src/prepare_model_data.py
+    deps:
+    - path: data/image_features_pca/test_image_features_pca.csv
+      hash: md5
+      md5: be04f9a197f6a3c43bbed77961d84df8
+      size: 27032006
+    - path: data/image_features_pca/train_image_features_pca.csv
+      hash: md5
+      md5: 01bfe9d70dfe614f737b3b9d81c95869
+      size: 80691019
+    - path: params.yaml
+      hash: md5
+      md5: 840d2e640108c6162172e522e2ed3661
+      size: 264
+    - path: src/prepare_model_data.py
+      hash: md5
+      md5: f0196e4a21683e8fcda0908d2193df50
+      size: 2297
+    outs:
+    - path: data/Model_data/test_tabular_image.csv
+      hash: md5
+      md5: cdb7f5457b72518e12b24ba2e7a24e07
+      size: 26994911
+    - path: data/Model_data/train_tabular_image.csv
+      hash: md5
+      md5: 2975bd99f4d20f2dd877c17ac73fd674
+      size: 80689452
+  train_tabular_model:
+    cmd: python src/model_tabular.py
+    deps:
+    - path: data/Model_data/test_tabular.csv
+      hash: md5
+      md5: c28fe3bfcd6d93e9d27035de7f0e27f3
+      size: 480322
+    - path: data/Model_data/train_tabular.csv
+      hash: md5
+      md5: 7f128f4befc8ec891d244a08ee4e9076
+      size: 1548348
+    - path: params.yaml
+      hash: md5
+      md5: 840d2e640108c6162172e522e2ed3661
+      size: 264
+    - path: src/model_tabular.py
+      hash: md5
+      md5: b569c11e239f4d8fcca074b8019f7c05
+      size: 3198
+    params:
+      params.yaml:
+        model:
+          id_col: id
+          target_col: price
+          test_size: 0.2
+          random_state: 42
+        xgboost:
+          n_estimators: 500
+          learning_rate: 0.05
+          max_depth: 6
+          subsample: 0.8
+          colsample_bytree: 0.8
+    outs:
+    - path: Submission/metrics_tabular.json
+      hash: md5
+      md5: 3e55854826932b49d18fab5cca0ec2e4
+      size: 119
+    - path: Submission/predictions_tabular.csv
+      hash: md5
+      md5: 9169b14e27238e46c73695639ddc1b20
+      size: 117491
+  train_tabular_image_model:
+    cmd: python src/model_tabular_image.py
+    deps:
+    - path: data/Model_data/test_tabular_image.csv
+      hash: md5
+      md5: cdb7f5457b72518e12b24ba2e7a24e07
+      size: 26994911
+    - path: data/Model_data/train_tabular_image.csv
+      hash: md5
+      md5: 2975bd99f4d20f2dd877c17ac73fd674
+      size: 80689452
+    - path: params.yaml
+      hash: md5
+      md5: 840d2e640108c6162172e522e2ed3661
+      size: 264
+    - path: src/model_tabular_image.py
+      hash: md5
+      md5: 5d8ecf0ff24407ec0071712968077ba6
+      size: 3278
+    params:
+      params.yaml:
+        model:
+          id_col: id
+          target_col: price
+          test_size: 0.2
+          random_state: 42
+        xgboost:
+          n_estimators: 500
+          learning_rate: 0.05
+          max_depth: 6
+          subsample: 0.8
+          colsample_bytree: 0.8
+    outs:
+    - path: Submission/metrics_tabular_image.json
+      hash: md5
+      md5: 8c2a8240671c542d3f4d2ca260426006
+      size: 125
+    - path: Submission/predictions_tabular_image.csv
+      hash: md5
+      md5: 776f114d670e3d72922fefbf60dba5b3
+      size: 117610
