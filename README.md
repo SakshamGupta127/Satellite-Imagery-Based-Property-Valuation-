@@ -64,8 +64,8 @@ This project extracts these **hidden visual signals from satellite imagery** and
 
 | Model | RMSE | MAE | R² |
 |------|------|-----|----|
-| Tabular Only | $178,425 | $114,270 | 77% |
-| Tabular + Images | **$158,572** | **$98,098** | **82%** |
+| Tabular Only | 178425 | 114270 | 77% |
+| Tabular + Images | **158572** | **98098** | **82%** |
 
 🔥 **11.13% RMSE Reduction using Satellite Imagery**  
 🔥 Clear proof that “images speak more than columns”
